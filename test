@@ -1,0 +1,46 @@
+//CREATE A POST
+router.post("/api/newpost", async (req, res) => {
+  await client.connect();
+  try {
+    client.query("BEGIN");
+    const {
+      post_title,
+      post_meta_title,
+      post_slug,
+      post_summary,
+      post_content,
+      post_published,
+      author_id,
+      category_id,
+    } = req.body;
+    const img = req.file.filename;
+    const now = new Date();
+    const query =
+      "INSERT INTO post (title,meta_title,slug,summary,content,published,publishedAt,author_id,image)VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING post_id";
+    const newpost = await client.query(query, [
+      post_title,
+      post_meta_title,
+      post_slug,
+      post_summary,
+      post_content,
+      post_published,
+      now,
+      author_id,
+      img,
+    ]);
+    res.json(newpost.rows[0]);
+
+    const newcat = client.query(
+      "INSERT INTO post_category(post_id,category_id)VALUES($1,$2)",
+      [newpost.rows[0].post_id, category_id]
+    );
+    client.query("COMMIT");
+  } catch (err) {
+    //console.error(err);
+    res.json(err.detail);
+    client.query("ROLLBACK");
+    res.send(500);
+  } finally {
+    client.end;
+  }
+});
