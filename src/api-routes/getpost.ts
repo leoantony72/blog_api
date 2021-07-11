@@ -1,10 +1,10 @@
-const express = require("express");
+import express, { Request, Response } from "express";
 
 const router = express.Router();
 const client = require("../config/database");
 
 //Get all Post
-router.get("/api/posts", async (req, res) => {
+router.get("/api/posts", async (req:Request, res:Response) => {
   await client.connect();
   try {
     await client.query("BEGIN");
@@ -14,15 +14,15 @@ router.get("/api/posts", async (req, res) => {
     res.json(allPosts.rows);
   } catch (err) {
     await client.query("ROLLBACK");
-    console.error(err.message);
-    res.send(500);
-  } finally {
-    await client.end;
+    res.status(400)
+    res.json(err);
+  }finally{
+    client.end
   }
 });
 
 //Get post by ID
-router.get("/api/post/:id", async (req, res) => {
+router.get("/api/post/:id", async (req:Request, res:Response) => {
   await client.connect();
   try {
     await client.query("BEGIN");
@@ -35,15 +35,15 @@ router.get("/api/post/:id", async (req, res) => {
     res.json(allTodos.rows);
   } catch (err) {
     await client.query("ROLLBACK");
-    console.error(err.message);
-    res.send(500);
-  } finally {
-    console.log("finished");
+    res.status(400)
+    res.json(err);
+  }finally{
+    client.end
   }
 });
 
 //GET POSTS IN A CATEGORY CATEGORY_TITLE)
-router.get("/api/posts/category/:category", async (req, res) => {
+router.get("/api/posts/category/:category", async (req:Request, res:Response) => {
   await client.connect();
   try {
     await client.query("BEGIN");
@@ -56,15 +56,15 @@ router.get("/api/posts/category/:category", async (req, res) => {
     res.json(allPost.rows);
   } catch (err) {
     await client.query("ROLLBACK");
-    console.error(err.message);  
-    res.send(500);  
-  } finally {
-    client.end;
+    res.status(400)
+    res.json(err);
+  }finally{
+    client.end
   }
 });
 
 //Get post by author (ID)
-router.get("/api/posts/author/:author", async (req, res) => {
+router.get("/api/posts/author/:author", async (req:Request, res:Response) => {
   await client.connect();
   try {
     await client.query("BEGIN");
@@ -78,10 +78,10 @@ router.get("/api/posts/author/:author", async (req, res) => {
     res.json(filterPost.rows);
   } catch (err) {
     await client.query("ROLLBACK");
-    console.error(err.message);
-    res.send(500);
-  } finally {
-    client.end;
+    res.status(400)
+    res.json(err);
+  }finally{
+    client.end
   }
 });
 

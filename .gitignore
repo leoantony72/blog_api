@@ -2,3 +2,5 @@ node_modules
 images
 .vscode
 .env
+test.md
+dist
