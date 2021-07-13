@@ -5,18 +5,12 @@ const fs = require("fs");
 const client = require("../config/database");
 const { promisify } = require("util");
 const { upload } = require("../config/multer");
-
 const unlinkAsync = promisify(fs.unlink);
 
-
-router.put(
-  "/api/post/:id",
-  upload.single("image"),
-  async (req: Request, res: Response) => {
-    await client.connect();
-    if (req.file == undefined) {
-      return res.status(400).send({ message: "Please upload a file!" });
-    }
+router.put("/api/post/:id", async (req: Request, res: Response) => {
+  await client.connect();
+  console.log(req.file)
+  await upload(req, res, async (error: any) => {
     try {
       await client.query("BEGIN");
       const { id } = req.params;
@@ -39,18 +33,11 @@ router.put(
       //get current img name
       const imgdel = initialimg.rows?.[0].image;
       console.log(imgdel);
-      const img = req.file.filename;
+      const img = req.file?.filename;
+      console.log(img)
 
       const query =
         "UPDATE post SET title = $1,meta_title = $2,slug = $3,summary = $4,content = $5,published = $6,author_id = $7,image = $8 WHERE post_id = $9";
-
-      /*client.query(query, values, (err: Error, req: Request, res: Response) => {
-        if (err) {
-          console.log(err.stack);
-        } else {
-          console.log("worked");
-        }
-      });*/
 
       const updatepost = await client.query(query, [
         post_title,
@@ -64,8 +51,9 @@ router.put(
         id,
       ]);
 
-      const category = "UPDATE post_category SET category_id = $1 WHERE post_id = $2"
-      const updatcategory = await client.query(category,[category_id,id])
+      const category =
+        "UPDATE post_category SET category_id = $1 WHERE post_id = $2";
+      const updatcategory = await client.query(category, [category_id, id]);
 
       await client.query("COMMIT");
 
@@ -83,24 +71,34 @@ router.put(
       }
     } catch (err) {
       await client.query("ROLLBACK");
-      await unlinkAsync(req.file.path);
+      await unlinkAsync(req.file?.path);
       res.status(400);
-      res.json(err);
+      res.json({
+        err:err,
+        error:error
+      });
     } finally {
       client.end;
     }
-  }
-);
+  });
+});
 
+//
+//
+//
 //delete a post
 router.delete("/api/post/:id", async (req: Request, res: Response) => {
   await client.connect();
   try {
     await client.query("BEGIN");
     const { id } = req.params;
+    const imgquery = await client.query("SELECT image FROM post WHERE post_id = $1",[id]);
+    const img = imgquery.rows?.[0].image;
+    console.log(img);
     const query = "DELETE FROM post WHERE post_id = $1";
     const deletePost = await client.query(query, [id]);
     await client.query("COMMIT");
+    await unlinkAsync("images/post_banner/" + img);
     res.json("post deleted");
   } catch (err) {
     await client.query("ROLLBACK");
