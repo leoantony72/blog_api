@@ -68,3 +68,11 @@ CREATE INDEX idx_post_category ON post_category(category_id ASC);
 SELECT * FROM post
 JOIN post_category ON post_category.post_id = post.post_id
 JOIN category ON category.id = post_category.post_id;
+
+
+CREATE TABLE public.user(
+username VARCHAR(40) NOT NULL UNIQUE,      
+password VARCHAR(40) NOT NULL,
+role VARCHAR(25) NOT NULL,
+sessionid text 
+);

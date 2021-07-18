@@ -7,9 +7,8 @@ const { promisify } = require("util");
 const { upload } = require("../config/multer");
 const unlinkAsync = promisify(fs.unlink);
 
-router.put("/api/post/:id", async (req: Request, res: Response) => {
+router.put("/post/:id", async (req: Request, res: Response) => {
   await client.connect();
-  console.log(req.file)
   await upload(req, res, async (error: any) => {
     try {
       await client.query("BEGIN");
@@ -32,9 +31,9 @@ router.put("/api/post/:id", async (req: Request, res: Response) => {
 
       //get current img name
       const imgdel = initialimg.rows?.[0].image;
-      console.log(imgdel);
+
       const img = req.file?.filename;
-      console.log(img)
+
 
       const query =
         "UPDATE post SET title = $1,meta_title = $2,slug = $3,summary = $4,content = $5,published = $6,author_id = $7,image = $8 WHERE post_id = $9";
@@ -74,8 +73,8 @@ router.put("/api/post/:id", async (req: Request, res: Response) => {
       await unlinkAsync(req.file?.path);
       res.status(400);
       res.json({
-        err:err,
-        error:error
+        err: err,
+        error: error,
       });
     } finally {
       client.end;
@@ -87,14 +86,16 @@ router.put("/api/post/:id", async (req: Request, res: Response) => {
 //
 //
 //delete a post
-router.delete("/api/post/:id", async (req: Request, res: Response) => {
+router.delete("/post/:id", async (req: Request, res: Response) => {
   await client.connect();
   try {
     await client.query("BEGIN");
     const { id } = req.params;
-    const imgquery = await client.query("SELECT image FROM post WHERE post_id = $1",[id]);
+    const imgquery = await client.query(
+      "SELECT image FROM post WHERE post_id = $1",
+      [id]
+    );
     const img = imgquery.rows?.[0].image;
-    console.log(img);
     const query = "DELETE FROM post WHERE post_id = $1";
     const deletePost = await client.query(query, [id]);
     await client.query("COMMIT");
