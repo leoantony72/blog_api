@@ -18,7 +18,7 @@ CREATE TABLE authors(
 
 
 /*POST*/
-CREATE TABLE post(
+CREATE TABLE postfg(
     post_id BIGSERIAL NOT NULL PRIMARY KEY,
     title VARCHAR(75) NOT NULL,
     meta_title VARCHAR(100) NULL,
@@ -35,7 +35,13 @@ CREATE TABLE post(
     ON UPDATE CASCADE  
 );
 
-CREATE INDEX idx_author ON post(author_id);
+CREATE TABLE savedpost(
+    id VARCHAR(11) NOT NULL,
+    users_id VARCHAR(11) NOT NULL REFERENCES users(user_id),
+    post_id VARCHAR(11) NOT NULL REFERENCES post(post_id)
+);
+
+CREATE INDEX idx_userid ON savedpost(users_id);
 
 
 /*CATEGORY*/

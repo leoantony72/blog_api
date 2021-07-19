@@ -3,6 +3,8 @@ const router = express.Router();
 import crypto from "crypto";
 const bcrypt = require("bcrypt");
 const client = require("../config/database");
+import { customAlphabet } from "nanoid";
+const nanoid = customAlphabet('1234567890abcdef', 11)
 
 declare module "express-session" {
   interface SessionData {
@@ -22,9 +24,11 @@ router.post("/register", async (req: Request, res: Response) => {
     //the hash has the salt
     const hash = await bcrypt.hash(req.body.password, 10);
     //store user, password and role
+    const id = nanoid();
+    const date = new Date();
     await client.query(
-      "INSERT INTO users (username, passwordhash)VALUES($1,$2)",
-      [req.body.username, hash]
+      "INSERT INTO users (userid,username, passwordhash,registeredat)VALUES($1,$2,$3,$4)",
+      [id,req.body.username, hash,date]
     );
     res.send({ success: "User created successfully" });
   } else res.send({ error: "User already exists.." });
@@ -49,7 +53,7 @@ router.post("/login", async (req: Request, res: Response) => {
         //generate new session id
         const sessionId = await randomString();
         //update the table with the new session id
-        const sql = "update users set sessionid = $1 where username = $2";
+        const sql = "UPDATE users SET sessionid = $1 WHERE username = $2";
         const result = await client.query(sql, [sessionId, req.body.username]);
         req.session.sessionId = sessionId;
         res.send({ success: "Logged in successfully!" });

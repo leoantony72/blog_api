@@ -7,7 +7,8 @@ const getposts = require("./api-routes/getpost");
 const newpost = require("./api-routes/newPost");
 const postFunction = require("./api-routes/postFunctions");
 const login = require("./api-routes/login");
-import { validateSession } from "./middleware/validation";
+const savepost = require("./api-routes/savedPost");
+import { validateUsers, Adminvalidate } from "./middleware/validation";
 
 //...
 //middlewares
@@ -35,9 +36,10 @@ app.get("/", (req: Request, res: Response) => {
 
 //routes
 app.use("/images", express.static("./images/post_banner"));
-app.use("/api/admin", validateSession, newpost, postFunction);
+app.use("/api/admin", Adminvalidate, newpost, postFunction);
 app.use("/api", login);
 app.use("/api", getposts);
+app.use("/api", validateUsers, savepost);
 
 //App Listen
 app.listen(3400, () => {
