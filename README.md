@@ -187,7 +187,7 @@ http://localhost:3400/api/register
 ```JSON
 {
   "username":"Leoantony72",
-  "password":"test1234" //passwords are hashed before they r stored in database
+  "password":"test1234" //passwords are hashed before they are stored in database
 }
 ```
 &nbsp;
@@ -245,7 +245,7 @@ http://localhost:3400/api/admin/upload //create new post
 
 ```json
 {
-  "post_id": "hapefdmrktf" //IF SUCESS IT WILL RETURN A POSTID
+  "post_id": "hapefdmrktf" //IF SUCCESS IT WILL RETURN A POSTID
 }
 ```
 &nbsp;
@@ -308,7 +308,7 @@ http://localhost:3400/api/savedpost/itlfosfntlj //save post
 
 ```json
 {
-  "success": "Post saved" // if sucess you will get this
+  "success": "Post saved" // if success you will get this
 }
 ```
 &nbsp;
@@ -320,7 +320,7 @@ http://localhost:3400/api/savedpost/itlfosfntlj //delete saved post
 ```
 ```json
 {
-  "success": "Post deleted" // if sucess you will get this
+  "success": "Post deleted" // if success you will get this
 }
 ```
 &nbsp;
