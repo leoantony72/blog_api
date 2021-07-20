@@ -73,7 +73,7 @@ router.get("/posts/author/:author", async (req: Request, res: Response) => {
     await client.query("BEGIN");
     const { author } = req.params;
     const query =
-      "SELECT * FROM post JOIN authors ON post.author_id = authors.id JOIN post_category ON post_category.post_id = post.post_id JOIN category ON category.id = post_category.category_id WHERE authors.id = $1";
+      "SELECT * FROM post JOIN authors ON post.author_id = authors.id JOIN post_category ON post_category.post_id = post.post_id JOIN category ON category.id = post_category.category_id WHERE authors.username = $1";
     const filterPost = await client.query(query, [author]);
     await client.query("COMMIT");
     res.json(filterPost.rows);

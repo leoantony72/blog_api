@@ -44,6 +44,43 @@ router.post("/savedpost/:id", async (req: Request, res: Response) => {
   }
 });
 
+router.delete("/savedpost/:id", async (req: Request, res: Response) => {
+  await client.connect();
+  const post_id = req.params.id;
+  const sessionid = req.session.sessionId;
+  if (!sessionid) {
+    res.json({ error: "Please Login To Use This Feature" });
+  } else {
+    client.query("BEGIN");
+    //check sessionid in db
+    const sessionquery = "SELECT userid FROM users WHERE sessionid = $1";
+    const result = await client.query(sessionquery, [sessionid]);
+    const user_id = result.rows[0].userid;
+    //check if post exist
+    const checkifpostexist = await client.query(
+      "SELECT * FROM post WHERE post_id = $1",
+      [post_id]
+    );
+    if (checkifpostexist.rowCount === 0) {
+      res.json({ error: "Post Not Found" });
+    } else {
+      //check if post is saved
+      const checkquery =
+        "SELECT * FROM savedpost WHERE userid = $1 AND postid = $2";
+      const checkifexist = await client.query(checkquery, [user_id, post_id]);
+      if(checkifexist.rowCount === 0){
+        res.json({error:"Post Not Saved"})
+        await client.query("ROLLBACK");
+      }else{
+        const delquery = "DELETE FROM savedpost WHERE postid = $1";
+        const delsavedpost = await client.query(delquery,[post_id])
+        await res.json({success:"Post Deleted"})
+        await client.query("COMMIT");
+      }
+    }
+  }
+});
+
 router.get("/savedpost", async (req: Request, res: Response) => {
   await client.connect();
   const sessionid = req.session.sessionId;

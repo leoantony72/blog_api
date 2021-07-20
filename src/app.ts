@@ -7,6 +7,7 @@ const getposts = require("./api-routes/getpost");
 const newpost = require("./api-routes/newPost");
 const postFunction = require("./api-routes/postFunctions");
 const login = require("./api-routes/login");
+const search = require("./api-routes/search");
 const savepost = require("./api-routes/savedPost");
 import { validateUsers, Adminvalidate } from "./middleware/validation";
 
@@ -30,16 +31,21 @@ app.use(
   })
 );
 
-app.get("/", (req: Request, res: Response) => {
-  res.send("hello");
-});
-
 //routes
 app.use("/images", express.static("./images/post_banner"));
 app.use("/api/admin", Adminvalidate, newpost, postFunction);
 app.use("/api", login);
 app.use("/api", getposts);
+app.use("/api", search);
 app.use("/api", validateUsers, savepost);
+
+app.get("/", (req: Request, res: Response) => {
+  res.send("hello");
+});
+
+app.get("*", function (req, res) {
+  res.status(404).send("what???");
+});
 
 //App Listen
 app.listen(3400, () => {
