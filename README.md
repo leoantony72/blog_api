@@ -13,7 +13,7 @@
 
 ## File Structure
 
-![GitHub Logo](/images/file.png)
+![GitHub Logo](/file.png)
 
 ## Basic commands
 
@@ -241,7 +241,7 @@ http://localhost:3400/api/admin/upload //create new post
 
 <P>WE ALSO HAVE TO UPLOAD IMAGE SO CHOOSE *FORM DATA* IN POSTMAN ❗❗ </P>
 
-![GitHub Logo](/images/newpost.png)
+![GitHub Logo](/newpost.png)
 
 ```json
 {
@@ -256,7 +256,7 @@ http://localhost:3400/api/admin/upload //create new post
 http://localhost:3400/api/admin/post/hapefdmrktf //update post
 ```
 
-![GitHub Logo](/images/updatepost.png)
+![GitHub Logo](/updatepost.png)
 
 ```json
 "post updated" //if success you will get this
@@ -358,7 +358,7 @@ http://localhost:3400/api/savedpost //Get saved post
 
 - <b>Dependencies</b> 
 
-![GitHub Logo](/images/Dependencies.png)
+![GitHub Logo](/Dependencies.png)
 
 
 
