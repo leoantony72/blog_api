@@ -10,6 +10,9 @@ const login = require("./api-routes/login");
 const search = require("./api-routes/search");
 const savepost = require("./api-routes/savedPost");
 import { validateUsers, Adminvalidate } from "./middleware/validation";
+const errhandler = require("./api-routes/err handler/sessiontimout");
+const client = require("./config/database");
+const pgSession = require("connect-pg-simple")(session);
 
 //...
 //middlewares
@@ -17,30 +20,42 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
+
 app.use(
   session({
-    name: "SESSION",
-    resave: false,
-    saveUninitialized: false,
     secret: "790e382439b1a8b6db2c0547bd819f1d83e25ca3e",
+    name: "SESSION",
+    store: new pgSession({
+      pool: client,
+      tableName: "sessiond",
+      pruneSessionInterval: 5,
+    }),
     cookie: {
       maxAge: 1000 * 60 * 5,
       httpOnly: true,
       secure: false,
     },
+    rolling: true,
+    resave: false,
+    saveUninitialized: false,
   })
 );
 
 //routes
+app.use(errhandler);
 app.use("/images", express.static("./images/post_banner"));
 app.use("/api/admin", Adminvalidate, newpost, postFunction);
-app.use("/api", login);
+app.use("/api/auth", login);
 app.use("/api", getposts);
 app.use("/api", search);
-app.use("/api", validateUsers, savepost);
+app.use("/api", savepost);
 
 app.get("/", (req: Request, res: Response) => {
-  res.send("hello");
+  if (req.session.newsession) {
+    res.send(`${req.session.userid}`);
+  } else {
+    res.send("no sess");
+  }
 });
 
 app.get("*", function (req, res) {

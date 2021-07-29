@@ -8,11 +8,10 @@ const { upload } = require("../config/multer");
 const unlinkAsync = promisify(fs.unlink);
 
 router.put("/post/:id", async (req: Request, res: Response) => {
-  await client.connect();
   await upload(req, res, async (error: any) => {
     try {
       await client.query("BEGIN");
-      const { id } = req.params;
+      const  id  = req.params.id;
       const {
         post_title,
         post_meta_title,
@@ -55,14 +54,11 @@ router.put("/post/:id", async (req: Request, res: Response) => {
       const updatcategory = await client.query(category, [category_id, id]);
 
       await client.query("COMMIT");
-
       const currentimg = await client.query(
         "SELECT image FROM post WHERE post_id = $1",
         [id]
       );
-
       res.json("post updated");
-
       if (initialimg === currentimg) {
         res.json("img is same");
       } else {
@@ -76,18 +72,13 @@ router.put("/post/:id", async (req: Request, res: Response) => {
         err: err,
         error: error,
       });
-    } finally {
-      client.end;
     }
   });
 });
 
-//
-//
-//
+
 //delete a post
-router.delete("/post/:id", async (req: Request, res: Response) => {
-  await client.connect();
+router.delete("/post/:id", async (req: Request, res: Response) => {  
   try {
     await client.query("BEGIN");
     const { id } = req.params;
@@ -105,8 +96,6 @@ router.delete("/post/:id", async (req: Request, res: Response) => {
     await client.query("ROLLBACK");
     res.status(400);
     res.json(err);
-  } finally {
-    client.end;
   }
 });
 

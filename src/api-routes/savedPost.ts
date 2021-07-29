@@ -4,19 +4,15 @@ import { customAlphabet } from "nanoid";
 const nanoid = customAlphabet("1234567890abcdefghijklmno", 11);
 const client = require("../config/database");
 
+//save a post
 router.post("/savedpost/:id", async (req: Request, res: Response) => {
-  await client.connect();
   const post_id = req.params.id;
-  const sessionid = req.session.sessionId;
+  const sessionid = req.session.newsession;
+  const userid = req.session.userid;
   if (!sessionid) {
     res.json({ error: "Please Login To Use This Feature" });
   } else {
     client.query("BEGIN");
-    //check sessionid in db
-    const sessionquery = "SELECT userid FROM users WHERE sessionid = $1";
-    const result = await client.query(sessionquery, [sessionid]);
-    const user_id = result.rows[0].userid;
-    //check if post exist
     const checkifpostexist = await client.query(
       "SELECT * FROM post WHERE post_id = $1",
       [post_id]
@@ -27,79 +23,83 @@ router.post("/savedpost/:id", async (req: Request, res: Response) => {
       //check if post is already saved
       const checkquery =
         "SELECT * FROM savedpost WHERE userid = $1 AND postid = $2";
-      const checkifexist = await client.query(checkquery, [user_id, post_id]);
+      const checkifexist = await client.query(checkquery, [userid, post_id]);
       if (checkifexist.rowCount === 0) {
         //chechquery = true
         const addquery = "INSERT INTO savedpost(userid,postid)VALUES($1,$2)";
-        const addsaved = await client.query(addquery, [user_id, post_id]);
-        await res.json({ sucess: "Post saved" });
+        const addsaved = await client.query(addquery, [userid, post_id]);
+        res.json({ sucess: "Post saved" });
         await client.query("COMMIT");
-        await client.end;
+
       } else {
         await client.query("ROLLBACK");
         res.json({ error: "Post already saved!" });
-        await client.end;
+
       }
     }
   }
 });
-
+//delete savedpost
 router.delete("/savedpost/:id", async (req: Request, res: Response) => {
-  await client.connect();
   const post_id = req.params.id;
-  const sessionid = req.session.sessionId;
+  const sessionid = req.session.newsession;
+  const userid = req.session.userid;
   if (!sessionid) {
     res.json({ error: "Please Login To Use This Feature" });
   } else {
     client.query("BEGIN");
-    //check sessionid in db
-    const sessionquery = "SELECT userid FROM users WHERE sessionid = $1";
-    const result = await client.query(sessionquery, [sessionid]);
-    const user_id = result.rows[0].userid;
     //check if post exist
     const checkifpostexist = await client.query(
-      "SELECT * FROM post WHERE post_id = $1",
+      "SELECT post_id,title FROM post WHERE post_id = $1",
       [post_id]
     );
     if (checkifpostexist.rowCount === 0) {
       res.json({ error: "Post Not Found" });
+      await client.query("ROLLBACK");
     } else {
       //check if post is saved
       const checkquery =
         "SELECT * FROM savedpost WHERE userid = $1 AND postid = $2";
-      const checkifexist = await client.query(checkquery, [user_id, post_id]);
-      if(checkifexist.rowCount === 0){
-        res.json({error:"Post Not Saved"})
+      const checkifexist = await client.query(checkquery, [userid, post_id]);
+      if (checkifexist.rowCount === 0) {
+        res.json({ error: "Post Not Saved" });
         await client.query("ROLLBACK");
-      }else{
-        const delquery = "DELETE FROM savedpost WHERE postid = $1";
-        const delsavedpost = await client.query(delquery,[post_id])
-        await res.json({success:"Post Deleted"})
+      } else {
+        const delquery =
+          "DELETE FROM savedpost WHERE userid = $1 AND postid = $2";
+        const delsavedpost = await client.query(delquery, [userid, post_id]);
+        await res.json({ success: "Post Deleted" });
         await client.query("COMMIT");
+
       }
     }
   }
 });
-
+//Get savedpost
 router.get("/savedpost", async (req: Request, res: Response) => {
-  await client.connect();
-  const sessionid = req.session.sessionId;
+  const sessionid = req.session.newsession;
+  const userid = req.session.userid;
   //check if sessionid is present
   if (!sessionid) {
     res.json({ error: "Please Login To Use This Feature" });
+
   } else {
     client.query("BEGIN");
     const result = await client.query(
-      "SELECT userid FROM users WHERE sessionid = $1",
-      [sessionid]
+      "SELECT userid FROM users WHERE userid = $1",
+      [userid]
     );
-    const user_id = result.rows[0].userid;
-    console.log(user_id);
     const query =
       "SELECT * FROM post JOIN savedpost ON post.post_id = savedpost.postid WHERE savedpost.userid = $1";
-    const savedpost = await client.query(query, [user_id]);
-    await res.json(savedpost.rows);
-    await client.query("COMMIT");
+    const savedpost = await client.query(query, [userid]);
+    if (savedpost.rowCount === 0) {
+      res.json({ error: "No Post Saved" });
+
+    } else {
+      await res.json(savedpost.rows);
+      await client.query("COMMIT");
+
+    }
   }
 });
 

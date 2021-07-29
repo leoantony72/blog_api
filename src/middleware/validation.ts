@@ -6,19 +6,23 @@ export async function Adminvalidate(
   res: Response,
   next: NextFunction
 ) {
-  const sess = req.session.sessionId;
-
-  const query = "SELECT * FROM users WHERE sessionid = $1";
-  const result = await client.query(query, [sess]);
-
-  //fail
-  if (result.rowCount === 0) {
-    res.status(400).send({ error: "You Stepped In The Wrong Path!!! " });
+  console.log("admin");
+  const sess = req.session.newsession;
+  const userid = req.session.userid;
+  if (!sess) {
+    res.json({ error: "You Stepped In The Wrong Path" });
   } else {
-    if (result.rows[0].user_role === "ADMIN") {
-      next();
-    } else {
+    const query = "SELECT * FROM users WHERE userid = $1";
+    const result = await client.query(query, [userid]);
+    if (result.rowCount === 0) {
       res.status(400).send({ error: "You Stepped In The Wrong Path" });
+    } else {
+      if (result.rows[0].user_role === "ADMIN") {
+        console.log("passed admin");
+        next();
+      } else {
+        res.status(400).send({ error: "You Stepped In The Wrong Path" });
+      }
     }
   }
 }
@@ -28,17 +32,22 @@ export async function validateUsers(
   res: Response,
   next: NextFunction
 ) {
-  const sess = req.session.sessionId;
-
-  const query = "SELECT * FROM users WHERE sessionid = $1";
-  const result = await client.query(query, [sess]);
-  if (result.rowCount === 0) {
-    res.status(400).send({ error: "Please Login" });
+  console.log("user");
+  const sess = req.session.newsession;
+  const userid = req.session.userid;
+  if (!req.session.newsession) {
+    res.json({ error: "Please Login" });
   } else {
-    if (result.rows[0].user_role === "USER" || "ADMIN") {
-      next();
+    const query = "SELECT * FROM users WHERE userid = $1";
+    const result = await client.query(query, [userid]);
+    if (result.rowCount === 0) {
+      res.status(400).send({ error: "Please Login" });
     } else {
-      res.status(400).send({ error: "You Stepped In The Wrong Path" });
+      if (result.rows[0].user_role === "USER" || "ADMIN") {
+        next();
+      } else {
+        res.status(400).send({ error: "You Stepped In The Wrong Path" });
+      }
     }
   }
 }
