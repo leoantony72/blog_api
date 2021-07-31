@@ -18,7 +18,7 @@ async function logOut(req: Request, res: Response) {
     res.clearCookie("SESSION");
 
     // return to Login page
-    return res.redirect("/api/sessiontimout");
+    return res.redirect("/api/err/sessiontimout");
   });
 }
 
@@ -28,8 +28,8 @@ export async function active(req: Request, res: Response, next: NextFunction) {
   if (isLoggedIn(req) === true) {
     // get time stamp NOW
     const now = Date.now();
-    const fivemin = 1000 * 60 * 5;
-    console.log("this one ", Date.now() - 1000 * 60 * 5);
+    const fivemin = 3600000 * 60 * 10;
+    console.log("this one ", Date.now() - 3600000 * 60 * 10);
     // get time stamp BEFORE (the one created once the user loggedIn)
     const { createdAt } = req.session;
 
@@ -38,6 +38,5 @@ export async function active(req: Request, res: Response, next: NextFunction) {
       return await logOut(req, res);
     }
   }
-
   next();
 }

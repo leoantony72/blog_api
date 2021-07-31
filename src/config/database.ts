@@ -6,7 +6,7 @@ const pool = new Pool({
   host: process.env.DB_HOST,
   port: process.env.DB_PORT,
   database: process.env.DB_DATABASE || "blog",
-  max: 5,
+  max: 20,
   connectionTimeoutMillis: 0,
   idleTimeoutMillis: 0,
 });

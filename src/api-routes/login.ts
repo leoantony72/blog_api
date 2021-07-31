@@ -30,40 +30,35 @@ router.post("/register", async (req: Request, res: Response) => {
   }
 });
 
-router.post("/login", active, async (req: Request, res: Response) => {
+router.post("/login",async (req: Request, res: Response) => {
+  //check if session.newsession is present
   if (!req.session.newsession) {
     await client.query("BEGIN");
     const query = "SELECT * FROM users WHERE username = $1";
     const result = await client.query(query, [req.body.username]);
-
-    if (result.rowCount === 0) {
-      res.send({ error: "Incorrect username or password" });
-      await client.query("ROLLBACK");
-    } else {
+    if (result.rowCount != 0) {
       const saltedPassword = result.rows[0].passwordhash;
       const successResult = await bcrypt.compare(
         req.body.password,
         saltedPassword
       );
-      if (successResult === true) {
-        //generate new session id
-        const sessionId = await randomString();
-        req.session.newsession = sessionId;
-        req.session.userid = result.rows[0].userid;
+      if(successResult === true){
+        const session = await randomString();
+        req.session.newsession = session;
+        req.session.userid = result.rows[0].userid || null;
         req.session.createdAt = Date.now();
-        res.send({ success: "Logged in successfully!" });
         await client.query("COMMIT");
-      } else {
-        await client.query("ROLLBACK");
-        res.send({ error: "Incorrect username or password" });
+        res.send({ success: "Logged in successfully!" });
       }
+    }else{
+      await client.query("ROLLBACK");
+      res.json({error:"user don't exist"})
     }
   } else {
     await client.query("ROLLBACK");
-    res.json({ success: "You are alredy logged In" });
+    res.json({sucess:"You Are Already Logged In"})
   }
 });
-
 //logout user
 
 router.post("/logout", async (req, res) => {
