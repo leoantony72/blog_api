@@ -8,7 +8,7 @@ const pool = new Pool({
   database: process.env.DB_DATABASE || "blog",
   max: 20,
   connectionTimeoutMillis: 0,
-  idleTimeoutMillis: 0,
+  idleTimeoutMillis: 3000,
 });
 module.exports = pool;
 

@@ -1,10 +1,10 @@
 import express, { Request, Response } from "express";
-import { generateid } from "../controller/generateid";
+import { generateid } from "../../controller/generateid";
 const router = express.Router();
 const path = require("path");
 const fs = require("fs");
-const client = require("../config/database");
-const { upload } = require("../config/multer");
+const client = require("../../config/database");
+const { upload } = require("../../config/multer");
 
 //deleting file
 const { promisify } = require("util");

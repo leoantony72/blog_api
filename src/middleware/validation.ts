@@ -1,53 +1,43 @@
 import express, { Request, Response, NextFunction } from "express";
-const client = require("../config/database");
+import { check, validationResult } from "express-validator";
+import { nextTick } from "process";
 
-export async function Adminvalidate(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  console.log("admin");
-  const sess = req.session.newsession;
-  const userid = req.session.userid;
-  if (!sess) {
-    res.json({ error: "You Stepped In The Wrong Path" });
-  } else {
-    const query = "SELECT * FROM users WHERE userid = $1";
-    const result = await client.query(query, [userid]);
-    if (result.rowCount === 0) {
-      res.status(400).send({ error: "You Stepped In The Wrong Path" });
-    } else {
-      if (result.rows[0].user_role === "ADMIN") {
-        console.log("passed admin");
-        next();
-      } else {
-        res.status(400).send({ error: "You Stepped In The Wrong Path" });
-      }
+exports.validation = [
+  check("username")
+    .exists()
+    .matches(/^[A-Za-z$#%0-9\s]+$/)
+    .withMessage("Name must be alphabetic.")
+    .isLength({ min: 3, max: 128 })
+    .withMessage("Username must be minimum 4 characters long"),
+  check("email", "email is not valid").isEmail().normalizeEmail(),
+  check(
+    "password",
+    "Please enter a password at least 8 character and contain At least one uppercase.At least one lower case.At least one special character. "
+  )
+    .trim()
+    .notEmpty()
+    .withMessage("Password required")
+    .isLength({ min: 8 })
+    .withMessage("password must be minimum 8 length")
+    .matches(/(?=.*?[a-z])/)
+    .withMessage("At least one Lowercase")
+    .matches(/(?=.*?[0-9])/)
+    .withMessage("At least one Number")
+    .matches(/(?=.*?[#!@$%^&*-])/)
+    .withMessage("At least one special character")
+    .not()
+    .matches(/^$|\s+/)
+    .withMessage("White space not allowed"),
+  (req: Request, res: Response, next: NextFunction) => {
+    //returns err from validation
+    const errors = validationResult(req);
+    const extractedErrors: any = [];
+    errors
+      .array({ onlyFirstError: true })
+      .map((err) => extractedErrors.push({ [err.param]: err.msg }));
+    if (!errors.isEmpty()) {
+      return res.json({ error: extractedErrors });
     }
-  }
-}
-
-export async function validateUsers(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  console.log("user");
-  const sess = req.session.newsession;
-  const userid = req.session.userid;
-  if (!req.session.newsession) {
-    res.json({ error: "Please Login" });
-  } else {
-    const query = "SELECT * FROM users WHERE userid = $1";
-    const result = await client.query(query, [userid]);
-    if (result.rowCount === 0) {
-      res.status(400).send({ error: "Please Login" });
-    } else {
-      if (result.rows[0].user_role === "USER" || "ADMIN") {
-        next();
-      } else {
-        res.status(400).send({ error: "You Stepped In The Wrong Path" });
-      }
-    }
-  }
-}
+    next();
+  },
+];

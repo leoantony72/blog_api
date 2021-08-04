@@ -8,7 +8,7 @@ export function isLoggedIn(req: Request) {
 }
 
 //Logout function
-async function logOut(req: Request, res: Response) {
+export async function logOut(req: Request, res: Response) {
   // destroy user session
   req.session.destroy((err) => {
     // if err, then return to Home page
@@ -28,10 +28,10 @@ export async function active(req: Request, res: Response, next: NextFunction) {
   if (isLoggedIn(req) === true) {
     // get time stamp NOW
     const now = Date.now();
-    const fivemin = 3600000 * 60 * 10;
+    const fivemin: number = 3600000 * 60 * 10;
     console.log("this one ", Date.now() - 3600000 * 60 * 10);
     // get time stamp BEFORE (the one created once the user loggedIn)
-    const { createdAt } = req.session;
+    const createdAt = req.session.createdAt;
 
     // check if user already exceed (active/non-active) time in the system
     if (now > createdAt + fivemin) {
