@@ -4,6 +4,8 @@ import { validateUsers, Adminvalidate } from "./middleware/authvalidation";
 import { active } from "./middleware/auth";
 import cors from "cors";
 import morgan from "morgan";
+import jwt from "jsonwebtoken";
+require("dotenv").config();
 const client = require("./config/database");
 const pgSession = require("connect-pg-simple")(session);
 const getposts = require("./api-routes/getpost");
@@ -13,6 +15,7 @@ const login = require("./api-routes/login");
 const search = require("./api-routes/search");
 const savepost = require("./api-routes/savedPost");
 const errhandler = require("./api-routes/err handler/sessiontimout");
+const verifyemail = require("./api-routes/verifyemail");
 
 export const createApp = () => {
   const app = express();
@@ -22,7 +25,7 @@ export const createApp = () => {
   app.use(express.urlencoded({ extended: true }));
   app.use(morgan("dev"));
   app.use("/images", express.static("./images/post_banner"));
-
+  const secret: string = process.env.SESSION_SECRET!;
   app.use(
     session({
       store: new pgSession({
@@ -30,7 +33,7 @@ export const createApp = () => {
         tableName: "sessiond",
         pruneSessionInterval: 15,
       }),
-      secret: "790e382439b1a8b6db2c0547bd819f1d83e23e",
+      secret: secret,
       name: "SESSION",
       resave: false,
       saveUninitialized: false,
@@ -49,7 +52,8 @@ export const createApp = () => {
   app.use("/api/auth", login);
   app.use("/api", getposts);
   app.use("/api", search);
-  app.use("/api",validateUsers ,savepost);
+  app.use("/api", verifyemail);
+  app.use("/api", validateUsers, savepost);
 
   app.use((err: any, req: Request, res: Response, next: NextFunction) => {
     if (err.status === 401) {

@@ -28,13 +28,13 @@ export async function active(req: Request, res: Response, next: NextFunction) {
   if (isLoggedIn(req) === true) {
     // get time stamp NOW
     const now = Date.now();
-    const fivemin: number = 3600000 * 60 * 10;
+    const twentyfive: number = 3600000 * 60 * 10;
     console.log("this one ", Date.now() - 3600000 * 60 * 10);
     // get time stamp BEFORE (the one created once the user loggedIn)
     const createdAt = req.session.createdAt;
 
     // check if user already exceed (active/non-active) time in the system
-    if (now > createdAt + fivemin) {
+    if (now > createdAt + twentyfive) {
       return await logOut(req, res);
     }
   }
