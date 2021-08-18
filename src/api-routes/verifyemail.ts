@@ -1,9 +1,7 @@
 import express, { Request, Response } from "express";
 const router = express.Router();
 const client = require("../config/database");
-import jwt from "jsonwebtoken";
 
-const JWT_SECRET = "{8367E87C-B794-4A04-89DD-15FE7FDBFF78}";
 router.get("/verify/", async (req: Request, res: Response) => {
   const token = req.query.vif;
   if (token) {

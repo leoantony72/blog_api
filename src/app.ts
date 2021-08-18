@@ -5,6 +5,7 @@ import { active } from "./middleware/auth";
 import cors from "cors";
 import morgan from "morgan";
 import jwt from "jsonwebtoken";
+import path from "path";
 require("dotenv").config();
 const client = require("./config/database");
 const pgSession = require("connect-pg-simple")(session);
@@ -24,7 +25,7 @@ export const createApp = () => {
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   app.use(morgan("dev"));
-  app.use("/images", express.static("./images/post_banner"));
+  app.use("/images", express.static("images/post_banner"));
   const secret: string = process.env.SESSION_SECRET!;
   app.use(
     session({

@@ -70,15 +70,14 @@ CREATE TABLE post_category(
 CREATE INDEX idx_post_post ON post_category(post_id ASC);
 CREATE INDEX idx_post_category ON post_category(category_id ASC);
 
+CREATE TABLE tokens(
+    users_id VARCHAR(11) NOT NULL REFERENCES users(userid),
+    token TEXT NOT NULL UNIQUE,
+    expiry TEXT
+);
+
 /*Important*/
 SELECT * FROM post
 JOIN post_category ON post_category.post_id = post.post_id
 JOIN category ON category.id = post_category.post_id;
 
-
-CREATE TABLE public.user(
-username VARCHAR(40) NOT NULL UNIQUE,      
-password VARCHAR(40) NOT NULL,
-role VARCHAR(25) NOT NULL,
-sessionid text 
-);
