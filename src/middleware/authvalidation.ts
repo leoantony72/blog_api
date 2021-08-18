@@ -6,7 +6,7 @@ export async function Adminvalidate(
   res: Response,
   next: NextFunction
 ) {
-  console.log("admin");
+  //console.log("admin");
   const sess = req.session.newsession;
   const userid = req.session.userid;
   if (!sess) {

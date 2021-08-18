@@ -29,7 +29,7 @@ export async function active(req: Request, res: Response, next: NextFunction) {
     // get time stamp NOW
     const now = Date.now();
     const twentyfive: number = 3600000 * 60 * 10;
-    console.log("this one ", Date.now() - 3600000 * 60 * 10);
+    //console.log("this one ", Date.now() - 3600000 * 60 * 10);
     // get time stamp BEFORE (the one created once the user loggedIn)
     const createdAt = req.session.createdAt;
 

@@ -10,7 +10,7 @@ router.get("/verify/", async (req: Request, res: Response) => {
       [token]
     );
     const now = Date.now();
-    console.log(now - 1800000);
+    //console.log(now - 1800000);
     if (check.rowCount !== 0) {
       const expiredate = check.rows[0].expiry;
       if (now > expiredate) {
