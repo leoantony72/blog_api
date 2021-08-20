@@ -4,8 +4,6 @@ import { validateUsers, Adminvalidate } from "./middleware/authvalidation";
 import { active } from "./middleware/auth";
 import cors from "cors";
 import morgan from "morgan";
-import jwt from "jsonwebtoken";
-import path from "path";
 require("dotenv").config();
 const client = require("./config/database");
 const pgSession = require("connect-pg-simple")(session);
