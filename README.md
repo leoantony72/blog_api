@@ -8,6 +8,7 @@
 - Expressjs
 - Typescript
 - PostgreSQL
+- Redis
 
 &nbsp;
 
