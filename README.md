@@ -407,6 +407,7 @@ http://localhost:3000/api/savedpost //Get saved post
 <h5>
 <p>- Added Forgot Password</p>
 <p>- included session & cookies</p>
+<p>- Caching for Posts(/posts,/post/:id)</p>
 <p>- Email verification,if not verified you cannot login</p>
 <p>- You can only upload .png/.jpg/.jpeg file below 5mb ❗</p>
 <p>- Passwords and tokens are hashed & stored in database</p>

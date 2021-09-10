@@ -1,14 +1,31 @@
 import express, { Request, Response } from "express";
 const router = express.Router();
 const client = require("../config/database");
+const redis = require("redis");
+const { promisify } = require("util");
+
+const rclient = redis.createClient({
+  host: "127.0.0.1",
+  port: 6379,
+});
+
+const GET_ASYNC = promisify(rclient.get).bind(rclient);
+const SET_ASYNC = promisify(rclient.set).bind(rclient);
 
 //Get all Post
 router.get("/posts", async (req: Request, res: Response) => {
   try {
+    const reply = await GET_ASYNC('posts');
+    if (reply) {
+      console.log("using cached data");
+      res.send(JSON.parse(reply));
+      return;
+    }
     await client.query("BEGIN");
     const query = "SELECT * FROM post ORDER BY post_id";
     const allPosts = await client.query(query);
     await client.query("COMMIT");
+    const saveResult = await SET_ASYNC('posts', JSON.stringify(allPosts.rows), "EX", 50000);
     res.json(allPosts.rows);
   } catch (err) {
     await client.query("ROLLBACK");
@@ -20,12 +37,19 @@ router.get("/posts", async (req: Request, res: Response) => {
 //Get post by ID
 router.get("/post/:id", async (req: Request, res: Response) => {
   try {
+    const reply = await GET_ASYNC(req.params.id);
+    if (reply) {
+      console.log("using cached data");
+      res.send(JSON.parse(reply));
+      return;
+    }
     await client.query("BEGIN");
     const id = req.params.id;
     const query =
       "SELECT po.post_id,po.title,po.meta_title,po.summary,po.slug,po.content,po.published,po.publishedat,po.image AS coverimg,ar.username AS author,cat.title AS category FROM post po JOIN authors ar ON po.author_id = ar.id JOIN post_category pc ON pc.post_id = po.post_id JOIN category cat ON cat.id = pc.category_id WHERE po.post_id = $1";
     const post = await client.query(query, [id]);
     await client.query("COMMIT");
+    const saveResult = await SET_ASYNC(id, JSON.stringify(post.rows), "EX", 50000);
     res.json(post.rows);
   } catch (err) {
     await client.query("ROLLBACK");
